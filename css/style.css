@@ -262,11 +262,13 @@ img a {
 }
 
 /* footer text */
+.footer {
+  padding-top: 15px;
+}
 .footer p {
   font-size: .8em;
   letter-spacing: .1em;
   display: inline;
-  /*text-transform: lowercase;*/
   color: #333;
   padding: 0;
   margin: 0;
