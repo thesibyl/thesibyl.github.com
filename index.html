@@ -3,26 +3,52 @@ layout: default
 ---
 
 <h3>The problem: keeping shadow files secure</h3>
-<p>Secure storage of the <code>shadow</code> file and, in
-general, of any database of secret authentication tokens
-(think of passwords of users of a Web-based service) is one of
+<p>Secure storage of the <code>shadow</code> file and, in general, of any database of secret authentication tokens (think of passwords of users of a Web-based service) is one of
 the main security concerns of a Systems Administrator.</p>
-<p>With the advent of rainbow tables and cheap fast hardware,
-this problem has become especially relevant: today, dictionary
-attacks take negligible time (and the fact is
-that <strong>users</strong> will end up using passwords as
-simple as possible).</p>
-<p>We present a different approach for storing shadow files:
-using a separate server for checking the correctness of the
-password introduced by the user, taking advantage of asymmetric
-key encryption.</p>
-<p>In summary: instead of keeping the hash
-(as <code>crypt(3)</code> does, or <code>SHA1</code>) of the
-password in the <code>shadow</code> file, store an OAEP
-RSA-cyphertext of the password (using a public encryption key)
-and, each time the user tries to log in, ask <i>someone</i> (the
-owner of the <i>private</i> key) if the OAEP-encryption of the
-password issued by the logging user matches the stored
-cyphertext. That is: use an oracle to ask if the user has
-entered the correct password or not. This oracle is <strong>the
-Sibyl</strong>.</p>
+<p>With the advent of rainbow tables and cheap fast hardware, this problem has become especially relevant: today, dictionary attacks take negligible time (and the fact is that <strong>users</strong> will end up using passwords as simple as possible).</p>
+<p>We present a different approach for storing shadow files: using a separate server for checking the correctness of the password introduced by the user, taking advantage of asymmetric key encryption.</p>
+<p>In summary: instead of keeping the hash (as <code>crypt(3)</code> does, or <code>SHA1</code>) of the password in the <code>shadow</code> file, store an OAEP RSA-cyphertext of the password (using a public encryption key) and, each time the user tries to log in, ask <i>someone</i> (the owner of the <i>private</i> key) if the OAEP-encryption of the password issued by the logging user matches the stored cyphertext. That is: use an oracle to ask if the user has entered the correct password or not. This oracle is <strong>the Sibyl</strong>.</p>
+
+<h3>Introduction: logging through an oracle</h3>
+<p>The <strong>Sibyl</strong> is a device which answers if two OAEP RSA-encoded cyphertexts correspond to the same plane text, optimized (security-wise) for authentication algorithms in situations in which the database of authentication tokens &mdash;the password database&mdash; is deemed unsafe (which, as a matter of fact, means <i>always</i>). It may be thought of as an oracle, hence its name.</p>
+<p>It works as one of the classical Greek <a href="http://en.wikipedia.org/wiki/oracle">Oracles</a>: they issue an answer which makes sense only depending on the question and which reveals no real information (just a bit of it).  Technically, it is used to check whether an OAEP RSA-encrypted text (generated from, say, a password entered by a user at login) and another OAEP RSA-cyphertext (which is stored in the machine the user is trying to log in) correspond to the same plaintext. The login machine must ask the Sibyl, who just replies "yes" or "no" (the Sibyl, obviously, holds the private RSA key to be able to do this), revealing no information on the plaintext.</p>
+<p>It comprises two layers: a hardware item and a piece of software which implements a client-server architecture between the authenticating computer (the one the password database is stored on) and the hardware item. The diagram below shows a possible implementation.</p>
+
+<h3>Description</h3>
+<p>The <strong>Sibyl</strong> is connected to the Authentication Server (a.s.), which is &mdash;in the simplest case&mdash; the computer the user is trying to log in to. There are <i>two private/public key pairs</i>: the <i>encryption pair</i> and the <i>signing pair</i> (this is essential for the security of the protocol). The private keys are stored only on the <strong>Sibyl</strong>, whereas the a.s. has access to both public keys. On the a.s., the authentication tokens are stored (in our proof-of-concept) as base64 encoded RSA-encrypted <code>crypt(3)</code> passwords preceded by the salt used in the <code>crypt(3)</code> process. That is, each entry in the <code>shadow</code> database (if this is the case, it needs not be a shadow file or a Unix Login service) would look like:</p>
+<center>
+	<code>user:$1$SOvM5$Rada783R/783478dadfa... (till 2048 binary bits, say):...</code>
+</center>
+<p>Which is the username followed by the salt (<code>$1$SOvM5$</code>) and the output of</p>
+<center>
+	<code>base64(RSA_encrypt(crypt(password, salt))).</code>
+</center> 
+<p> Whenever a user tries to log in on the a.s., the following steps take place (first of all, the Authentication Server connects to the Sibyl): </p>
+<img src="images/sibyl.png" type="image/png" width="90%"/>
+<ul class="explanation">
+	<li>On the Authentication Server:</li>
+	    <ol>
+	      <li> The a.s. receives a <i>nonce</i> (unique to this authentication process) from the <strong>Sibyl</strong>: <code>n</code>.</li>
+	      <li> From the password database, the a.s. gets the <i>real</i> authentication token (which is RSA-encrypted with the <strong>Sibyl</strong>'s public key): <code>p1</code>, and (if this exists) the <code>salt</code> used to <code>crypt(3)</code> this token.</li>
+	      <li> The a.s. grabs the <code>password</code> entered by the logging user.
+	      <li> The a.s. encrypts &quot;<code>n:saltpassword</code> using the <strong>Sibyl</strong>'s public key to get <code>p2</code>.</li>
+	      <li> The a.s. generates another nonce <code>m</code>.</li>
+	      <li> The a.s. sends a message of the form <code>m;p1;p2</code> to the <strong>Sibyl</strong>.</li>
+	    </ol>
+	<li>On the <strong>Sibyl</strong>:</li>
+	    <ol>
+	      <li> The <strong>Sibyl</strong> decrypts <code>p1</code> and <code>p2</code> to get <code>u1</code> and <code>u2</code>. </li>
+	      <li> It checks that <code>u2</code> matches the (regexp) pattern <code>/^n:(.*)$/</code> [that is: the nonce <code>n</code> followed by a colon and any number of characters] and sets <code>v1=$1</code> (using Perl's regexp notation) [the set of characters after the colon].</li>
+	      <li> If <code>u1</code>=<code>v1</code> then it returns the message <code>m:1</code> <i>signed</i> with the signing key. Otherwise, it returns the message <code>m:0</code> <i>signed</i> with the same key.</li> 
+	      [By <i>signed</i>, we mean  followed by a semicolon and the base64 enconding of the RSA signature, using the signing key].
+	    </ol>
+	<li>On the a.s.:</li>
+	    <ol> 
+	      <li>It receives the signed message from the <strong>Sibyl</strong>.</li>
+	      <li> If the received message has been properly signed and the message is <code>m:1</code>, then <strong>grant authentication</strong>. In any other case <strong>deny authentication</strong>.</li>
+	    </ol>
+</ul>
+<p>A more technical sequence diagram would looke <a href="sibyl_sequence.png"> like this</a>.  </p>
+<p> All the process depends on the nature of the authentication database. There should be different implementations for Linux (using the standard <code>crypt</code> command), for OS X (which stores both the NETLAN and a SHA-1 encoding of the password), for OpenBSD (which uses blowfish), etc. Of course, it can be implemented in a SQL database storing passwords for logging purposes, or in any service storing authentication tokens which need to be kept as secret as possible.</p>
+
+
