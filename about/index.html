@@ -1,0 +1,24 @@
+---
+layout: default
+---
+
+<h3>What is The Sibyl?</h3>
+
+
+<h3>Why?</h3>
+<p>Because dictionary attacks and rainbow tables cannot be just defeated using complicated hash functions and salts: users always find the weakest possible password for any scheme.</p>
+
+<p>We are concerned about dictionary attacks on the shadow file (or on any database containing hashed authentication tokens). The advent of rainbow tables and fast, cheap computing has weakened the ability of hashes to keep &quot;passwords&quot; safe.</p>
+
+<p>However, the security issue does <strong>not</strong> lie on the hashing functions, but on the fact that despite any security measures, end users find always a way to use simple passwords (even more, each set of password requirements admits several &quot;simplest&quot; examples, which will be used frequently by different users and will be easily found when using a &quot;dictionary&quot; or a rainbow table).</p>
+
+<p>Our approach uses the random nature of OAEP, which essentially adds more than 80 bits of randomness to the cyphertext, making both dictionary and rainbow tables attacks infeasible (in order to obtain the same cyphertext, the attacker needs to try the same password as the user <strong>and</strong> use the same random bits when encrypting).</p>
+
+<h3>Want more?</h3>
+<p>For an overview of The Sibyl and why you would use it, you should watch the presentation we gave at <strong>NoConName 2011</strong> (Sorry, it is in Spanish only):</p>
+
+<p>
+<object id="flowplayer" width="720" height="404" data="http://www.globbtv.com/flv/flowplayer.commercial-3.2.3.swf" type="application/x-shockwave-flash"><param value="true" name="allowfullscreen"/><param value="always" name="allowscriptaccess"/><param value="high" name="quality"/><param value="true" name="cachebusting"/><param value="#000000" name="bgcolor"/><param name="movie" value="http://www.globbtv.com/flv/flowplayer.commercial-3.2.3.swf" /><param name="flashvars" value='config={"key":"#$cc8f7551c7e6a3f7d92", "canvas":{"backgroundColor":"#000000","backgroundGradient": "none","backgroundImage":"url(http://www.globbtv.com/img/watermark.jpg)"}, "clip":{"autoPlay":false,"url":"http://cdn.globbtv.com/003BDA/VODMS01/NoConName_La_Sibila.mp4"}}' /></object>
+</p>
+
+<p>Here you can see the slides:</p>
