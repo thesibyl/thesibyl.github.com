@@ -17,24 +17,27 @@ the main security concerns of a Systems Administrator.</p>
 <h3>Description</h3>
 <p>The <strong>Sibyl</strong> is connected to the Authentication Server (a.s.), which is &mdash;in the simplest case&mdash; the computer the user is trying to log in to. There are <i>two private/public key pairs</i>: the <i>encryption pair</i> and the <i>signing pair</i> (this is essential for the security of the protocol). The private keys are stored only on the <strong>Sibyl</strong>, whereas the a.s. has access to both public keys. On the a.s., the authentication tokens are stored (in our proof-of-concept) as base64 encoded RSA-encrypted <code>crypt(3)</code> passwords preceded by the salt used in the <code>crypt(3)</code> process. That is, each entry in the <code>shadow</code> database (if this is the case, it needs not be a shadow file or a Unix Login service) would look like:</p>
 <center>
-	<code>user:$1$SOvM5$Rada783R/783478dadfa... (till 2048 binary bits, say):...</code>
+	{% highlight console %} user:$1$SOvM5$Rada783R/783478dadfa... (till 2048 binary bits, say):...  {% endhighlight %}
 </center>
 <p>Which is the username followed by the salt (<code>$1$SOvM5$</code>) and the output of</p>
 <center>
-	<code>base64(RSA_encrypt(crypt(password, salt))).</code>
+	{% highlight console %} base64(RSA_encrypt(crypt(password, salt))).  {% endhighlight %}
 </center> 
 <p> Whenever a user tries to log in on the a.s., the following steps take place (first of all, the Authentication Server connects to the Sibyl): </p>
-<img src="images/sibyl.png" type="image/png" width="90%"/>
+<center>
+<img src="/images/sibyl.png" type="image/png" width="450px"/>
+</center>
 <ul class="explanation">
-	<li>On the Authentication Server:</li>
+	<li>On the <strong>Authentication Server</strong>:</li>
 	    <ol>
 	      <li> The a.s. receives a <i>nonce</i> (unique to this authentication process) from the <strong>Sibyl</strong>: <code>n</code>.</li>
 	      <li> From the password database, the a.s. gets the <i>real</i> authentication token (which is RSA-encrypted with the <strong>Sibyl</strong>'s public key): <code>p1</code>, and (if this exists) the <code>salt</code> used to <code>crypt(3)</code> this token.</li>
 	      <li> The a.s. grabs the <code>password</code> entered by the logging user.
-	      <li> The a.s. encrypts &quot;<code>n:saltpassword</code> using the <strong>Sibyl</strong>'s public key to get <code>p2</code>.</li>
+	      <li> The a.s. encrypts <code>n:saltpassword</code> using the <strong>Sibyl</strong>'s public key to get <code>p2</code>.</li>
 	      <li> The a.s. generates another nonce <code>m</code>.</li>
 	      <li> The a.s. sends a message of the form <code>m;p1;p2</code> to the <strong>Sibyl</strong>.</li>
 	    </ol>
+	</br>
 	<li>On the <strong>Sibyl</strong>:</li>
 	    <ol>
 	      <li> The <strong>Sibyl</strong> decrypts <code>p1</code> and <code>p2</code> to get <code>u1</code> and <code>u2</code>. </li>
@@ -42,13 +45,21 @@ the main security concerns of a Systems Administrator.</p>
 	      <li> If <code>u1</code>=<code>v1</code> then it returns the message <code>m:1</code> <i>signed</i> with the signing key. Otherwise, it returns the message <code>m:0</code> <i>signed</i> with the same key.</li> 
 	      [By <i>signed</i>, we mean  followed by a semicolon and the base64 enconding of the RSA signature, using the signing key].
 	    </ol>
-	<li>On the a.s.:</li>
+	</br>
+	<li>On the <strong>a.s.</strong>:</li>
 	    <ol> 
 	      <li>It receives the signed message from the <strong>Sibyl</strong>.</li>
 	      <li> If the received message has been properly signed and the message is <code>m:1</code>, then <strong>grant authentication</strong>. In any other case <strong>deny authentication</strong>.</li>
 	    </ol>
 </ul>
-<p>A more technical sequence diagram would looke <a href="sibyl_sequence.png"> like this</a>.  </p>
+<p>A more technical sequence diagram would look <a href="/images/sibyl_sequence.png"> like this</a>.  </p>
 <p> All the process depends on the nature of the authentication database. There should be different implementations for Linux (using the standard <code>crypt</code> command), for OS X (which stores both the NETLAN and a SHA-1 encoding of the password), for OpenBSD (which uses blowfish), etc. Of course, it can be implemented in a SQL database storing passwords for logging purposes, or in any service storing authentication tokens which need to be kept as secret as possible.</p>
 
-
+<h3>Implementation</h3>
+The <strong>Sibyl</strong> requires the following two layers:
+<h4>The hardware layer</h4>
+<p>A physical (possibly a virtual one serves, as well, if security is not compromised) computer, which <strong>must be</strong> different from the authentication server. Our proof-of-concept is a <a href="http://bifferos.bizhat.com">Bifferboard</a>, suitable for small-sized networks (no more than a few logins every hour). Login takes about five seconds using this device (the process requires three RSA "private encryption" operations).</p>
+<p>This is what we actually call <strong>the Sibyl</strong>.</p>
+<h4>The software layer</h4>
+<p> There is a <i>server</i> side, running on the <strong>Sibyl</strong>, and a client-side, running on the authentication server.</p> <p>The sever side is always the same: a daemon listening for connections from the <strong>a.s.</strong> and performing the dialogue described above.</p>
+<p>In the proof-of-concept, the part running on the <strong>a.s.</strong> is a PAM module. But this might well be a dedicated server, a set of daemons in layers, different processes for different logon services...  </p>

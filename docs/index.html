@@ -6,27 +6,27 @@ layout: default
 <p>This is a detailed (including the necessary commands) description of the installation and functioning of the Sibyl. We assume you already have a working authentication server (the computer you want to log in to) and a different machine (the Sibyl) which acts as the oracle.</p>
 <h4>Preparing the Sibyl</h4>
 <ol>
-<li><strong><a name="get_a_machine" class="item">Get a machine</a></strong>
-<p>First we need a 'Sibyl', which is a different machine from the server we want  to log in to. We are using a Bifferboard as a proof of concept (http://bifferos.bizhat.com/).</p>
+<li><strong>Get a machine</strong>
+<p>First we need a 'Sibyl', which is a different machine from the server we want  to log in to. We are using a <a href="http://bifferos.co.uk">Bifferboard</a> as a proof of concept.</p>
 </li>
-<li><strong><a name="install_linux_on_it" class="item">Install Linux on it</a></strong>
-<p>We assume a linux distro has been installed on the Sibyl (See the &quot;Install Slackware on a bifferboard&quot; manual if you are using a Bifferboard).</p>
+<li><strong>Install Linux on it</strong>
+<p>We assume a linux distro has been installed on the Sibyl (See the "Install Slackware on a bifferboard" manual if you are using a Bifferboard).</p>
 </li>
-<li><strong><a name="generate_the_rsa_pairs" class="item">Generate the RSA pairs</a></strong> 
+<li><strong>Generate the RSA pairs</strong> 
 <p>Create two RSA key pairs in the Sibyl (we use 2048bit keys): the encryption 
 pair and the signing pair</p>
 <ol>
-<li><strong><a name="encryption_decryption_pair" class="item">Encryption/Decryption pair</a></strong>
+<li><strong>Encryption/Decryption pair</strong>
 <p>Create the en/decryption pair with openssl. The private key will be named 
-'decrypt' and the public one 'decrypt.pub'</p>
-<pre>
+<code>decrypt</code> and the public one <code>decrypt.pub</code></p>
+{% highlight console %}
   # openssl genrsa -out decrypt 2048
   Generating RSA private key, 2048 bit long modulus
   ..............................................................................
   .........................................................+++
   ...................................+++
-  e is 65537 (0x10001)</pre>
-<pre>
+  e is 65537 (0x10001)
+
   # cat decrypt 
   -----BEGIN RSA PRIVATE KEY-----
   MIIEowIBAAKCAQEAwUQqL3lCVrfSQZVfMGfDg8Ee0HGTVk7B0th8Qzmcj/jQidd7
@@ -54,11 +54,11 @@ pair and the signing pair</p>
   Lx6HAoGBANco2d1RBvYk1WODeKg3L3yfrcDFMAfMFkmo07u9PrafQBxarJSTvE2v
   WV+4c//ZblImU6Say3BDwk7tdJNtL+ZPQEJYZd2MEO2vVZzphy5HCoQVgqGLPpTi
   pwFEyd1nDeZVoFmmW3GoEEa9kQBvXO2mt6rtu9ubokN93wXp7ABd
-  -----END RSA PRIVATE KEY-----</pre>
-<pre>
+  -----END RSA PRIVATE KEY-----
+
   # openssl rsa -in decrypt -pubout -out decrypt.pub
-  writing RSA key</pre>
-<pre>
+  writing RSA key
+
   # cat decrypt.pub 
   -----BEGIN PUBLIC KEY-----
   MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAwUQqL3lCVrfSQZVfMGfD
@@ -68,19 +68,21 @@ pair and the signing pair</p>
   ryUO+/3CpG5YdOSMjCOhvd+DlOfwz/+89dhx6cFXhHMHFoxt/QLwvQgeo5chA2So
   girjulAs1gMEGiPnQ/snmzBTvYv0Gw9M7a2Nfxeo4pN3D2lsU1MDbSfTW+IzfUUR
   lQIDAQAB
-  -----END PUBLIC KEY-----</pre>
+  -----END PUBLIC KEY-----
+{% endhighlight %}
 </li>
-<li><strong><a name="signing_pair" class="item">Signing pair</a></strong>
+<li><strong>Signing pair</strong>
 
 <p>Creating the signing pair with openssl. The private key will be named 
-'sign' and the public one 'sign.pub'</p>
-<pre>
+<code>sign</code> and the public one <code>sign.pub</code></p>
+{% highlight console %}
   root@sibyl:~# openssl genrsa -out sign 2048
   Generating RSA private key, 2048 bit long modulus
+
   ......................+++
   ..........+++
-  e is 65537 (0x10001)</pre>
-<pre>
+  e is 65537 (0x10001)
+
   # cat sign 
   -----BEGIN RSA PRIVATE KEY-----
   MIIEowIBAAKCAQEA5jwDvV7lpErFLcTn4F4CgFbfHSr7xEvVoYu3KJ2QIW1ryZnM
@@ -108,12 +110,12 @@ pair and the signing pair</p>
   rjxsewKBgCHs5UbewW2vRwfJdURgaHZkG2FBjRfq03heUvuFUUKbbwy+Ps7s1rzi
   rQ+RKSsgvhBJc+bf1A3tTTvTPuHi0o+LWAHwJ73cEuMNyzMyDZIwqkcuVi4KJCFz
   5QiFO/RJg4/ujxotuk3xuBl5gmy/p0NKezMeY0bzMicER8Cmf55V
-  -----END RSA PRIVATE KEY-----</pre>
-<pre>
-  root@sibyl:~# openssl rsa -in sign -pubout -out sign.pub
-  writing RSA key</pre>
-<pre>
-  root@sibyl:~# more sign.pub
+  -----END RSA PRIVATE KEY-----
+
+  # openssl rsa -in sign -pubout -out sign.pub
+  writing RSA key
+
+  # more sign.pub
   -----BEGIN PUBLIC KEY-----
   MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEA5jwDvV7lpErFLcTn4F4C
   gFbfHSr7xEvVoYu3KJ2QIW1ryZnMpm+J75dBv/oQ1LnFe9S1o+ziG72NhfU6bxlB
@@ -122,36 +124,37 @@ pair and the signing pair</p>
   5eZm3NmqmrxN4UvhbU+kF7cf2ZKwzTIOk5TmJR3wURYIq4n5vEv2ZQxNA6Zv9yjs
   Fkrpp8nd8OchSgulcF0V8/sH+zlPthEXzXkZGWjGe5MtUWMY5LZhmOmMS+HvOfmA
   KwIDAQAB
-  -----END PUBLIC KEY-----</pre>
+  -----END PUBLIC KEY-----
+{% endhighlight %}
 </li>
 </ol>
 </li>
 </ol>
 <p>
 </p>
-<h4><a name="preparing_the_authentication_server">Preparing the Authentication Server</a></h4>
+<h4>Preparing the Authentication Server</h4>
 <ol>
-<li><strong><a name="create_the_etc_sibyl_directory" class="item">Create the /etc/sibyl directory</a></strong>
+<li><strong>Create the <code>/etc/sibyl</code> directory</strong>
 
 <p>(you probably need to be root to do this).</p>
-<pre>
-  # mkdir /etc/sibyl &amp;&amp; cd /etc/sibyl</pre>
+  {% highlight console %} # mkdir /etc/sibyl; cd /etc/sibyl {% endhighlight %}
 </li>
-<li><strong><a name="keys" class="item">Copy the public keys (generated on the sibyl) into the /etc/sibyl directory.</a></strong>
+<li><strong>Copy the public keys (generated on the sibyl) into the <code>/etc/sibyl</code> directory.</strong>
 
 <p>Notice that the private keys *must never leave the Sibyl*. Their secrecy 
 is the basis for the security of this system.</p>
-<pre>
+{% highlight console %}
   # scp root@sibyl:*.pub .
   decrypt.pub
-  sign.pub</pre>
+  sign.pub
+{% endhighlight %}
 </li>
-<li><strong><a name="create_the_shadow_file" class="item">Create the shadow file</a></strong>
+<li><strong>Create the shadow file</strong>
 
 <p>This is where the user authentication tokens will be stored
-(/etc/sibyl/shadow).</p>
+(<code>/etc/sibyl/shadow</code>).</p>
 <ol>
-<li><strong><a name="encrypt" class="item">Encrypt (with crypt(3)) the user password</a></strong>
+<li><strong>Encrypt (with <code>crypt(3)</code>) the user password</strong>
 
 <p>First, we need to encrypt the user password using the crypt function. 
 This function takes a password as a string, and a salt character array and 
@@ -163,55 +166,56 @@ without a salt, an intruder can make a guess, run crypt on it once, and
 compare the result with all the passwords. With a salt, the intruder must run 
 crypt once for each different salt.</p>
 <p>In this brief tutorial, we are going to use the MD5-based salt that 
-consists of the string $1$, followed by up to 8 characters and another $, and 
-the string. The result of crypt will be the salt, followed by a $ if the salt 
-didn't end with one, followed by 22 characters from the alphabet ./0-9A-Za-z, 
+consists of the string <code>$1$</code>, followed by up to 8 characters and another <code>$</code>, and 
+the string. The result of crypt will be the salt, followed by a <code>$</code> if the salt 
+didn't end with one, followed by 22 characters from the alphabet <code>./0-9A-Za-z</code>, 
 up to 34 characters total. Every character in the key is significant.</p>
-<p>For doing this we provides a short program (crypt.c) that uses the crypt 
+<p>For doing this we provides a short program (<code>crypt.c</code>) that uses the crypt 
 function with the password passed as an argument and the salt that can be 
 passed. If not, it will be (not very) randomnly generated.</p>
-<p>Notice that the Sibyl's distribution includes a shadow2sibyl.pl scripts which
+<p>Notice that the Sibyl's distribution includes a <code>shadow2sibyl.pl</code> scripts which
 turns standard shadow files into Sibyl-enabled files. More on this in its
-man page shadow2sibyl(n).</p>
-<pre>
+man page <code>shadow2sibyl(n)</code>.</p>
+{% highlight console %}
   # cd lib
-  # gcc -lcrypt crypt.c -o crypt</pre>
-<pre>
+  # gcc -lcrypt crypt.c -o crypt
   # ./crypt patata
-  $1$56X0AGPE$AvbQvdvZFPkkJetNItkr91</pre>
+  $1$56X0AGPE$AvbQvdvZFPkkJetNItkr91
+{% endhighlight %}
 </li>
-<li><strong><a name="rsa_encrypt_and_base64_the_above" class="item">RSA-encrypt and base64 the above</a></strong>
+<li>RSA-encrypt and base64 the above</strong>
 
 <p>The output of the crypt function will be RSA-encrypted using the decryption
-public key and base64 encoded, that is: base64(RSA_encrypt(crypt(password, salt))).
+public key and base64 encoded, that is: <code>base64(RSA_encrypt(crypt(password, salt)))</code>.
 This shall be stored without newlines, though (however we include them in this
 tutorial for clarity).</p>
-<pre>
-  # echo &quot;$1$56X0AGPE$AvbQvdvZFPkkJetNItkr91&quot; | \
+{% highlight console %}
+  # echo "$1$56X0AGPE$AvbQvdvZFPkkJetNItkr91" | \
     openssl rsautl -encrypt -inkey decrypt.pub -pubin | openssl enc -base64
   jlWP/arJwMMLbVwpPZn6k7um8+k00lyfJDX+k7WJzQt/wrvb1Lg7XLdWKVNB5+mT
   1hWah1IX+A4rb4UImHyjKV+L4zLFSiNUbR2YKJCKG7+aOWlYO03fhF5ehuvRVXmW
   4ouIzEVahn4Jx5rkqqCejdOKJqDftgOArWc+6lwLmPOqHG6Zbn9FaKq9A8OeGrst
   BleT7MJZ+Oqnbli70tGoQWBeQmMrvnqLejPuqawiwE3ZP5weFWn9vsidp4rY/Qb4
   ij3vRMznuC3ErcaRBiVH+l2g8t26Q0vLPO+cyuF6xvvKtmwxmZYSThQfebJYjuKn
-  CArtgl6hrIN9ye26N5o5KA==</pre>
+  CArtgl6hrIN9ye26N5o5KA==
+{% endhighlight %}
 </li>
-<li><strong><a name="description_of_the_shadow_file" class="item">Description of the shadow file</a></strong>
+<li><strong>Description of the shadow file</strong>
 
 <p>The format of each row (user authentication tokens) in the file 
-/etc/sibyl/shadow is:</p>
-<pre>
-  user : salt base64(RSA_encrypt(crypt(password, salt))) : [other shadow fields]</pre>
+<code>/etc/sibyl/shadow</code> is:</p>
+  {% highlight console %}user : salt base64(RSA_encrypt(crypt(password, salt))) : [other shadow fields]{% endhighlight %}
 <p>In the example, the row will be:</p>
-<pre>
+{% highlight console %}
   rafacas:$1$56X0AGPE$jlWP/arJwMMLbVwpPZn6k7um8+k00lyfJDX+k7WJzQt/wrvb1Lg7XLdWKVNB5+mT
   1hWah1IX+A4rb4UImHyjKV+L4zLFSiNUbR2YKJCKG7+aOWlYO03fhF5ehuvRVXmW
   4ouIzEVahn4Jx5rkqqCejdOKJqDftgOArWc+6lwLmPOqHG6Zbn9FaKq9A8OeGrst
   BleT7MJZ+Oqnbli70tGoQWBeQmMrvnqLejPuqawiwE3ZP5weFWn9vsidp4rY/Qb4
   ij3vRMznuC3ErcaRBiVH+l2g8t26Q0vLPO+cyuF6xvvKtmwxmZYSThQfebJYjuKn
-  CArtgl6hrIN9ye26N5o5KA==:[other shadow fields]</pre>
-<pre>
+  CArtgl6hrIN9ye26N5o5KA==:[other shadow fields]
+{% endhighlight %}
   The parts of the row are:
+{% highlight console %}
     rafacas:$1$56X0AGPE$jlWP/arJwMMLbVwpPZn6k7um8+k00lyfJD... (till 2048 binary bits)
     |_____| |__________||___________________________________|
        |         |                       |
@@ -223,66 +227,71 @@ tutorial for clarity).</p>
                  |
              ____|_____
             |          |
-            $1$56X0AGPE$AvbQvdvZFPkkJetNItkr91 &lt;- crypt(password, salt)</pre>
+            $1$56X0AGPE$AvbQvdvZFPkkJetNItkr91 &lt;- crypt(password, salt)
+{% endhighlight %}
 </li>
 </ol>
 </li>
 </ol>
 <p>
 </p>
-<h4><a name="the_protocol">The Protocol</a></h4>
+<h4>The Protocol</h4>
 <ol>
-<li><strong><a name="startup" class="item">Startup</a></strong>
+<li><strong>Startup</strong>
 
 <p>The Authentication Server (AS) connects to the Sibyl and expects to receive
 a random nonce.</p>
 </li>
-<li><strong><a name="the_sibyl_generates_a_nonce_and_sends_it_to_the_as_in_the_example_we_use_the_random_environment_variable" class="item">The Sibyl generates a nonce and sends it to the AS. In the example we use
-the $RANDOM environment variable.</a></strong>
+<li><strong>The Sibyl generates a nonce and sends it to the AS. In the example we use
+the <code>$RANDOM</code> environment variable.</strong>
 
-<pre>
+{% highlight console %}
   # export nonce_sibyl=`cho $RANDOM  # echo $nonce_sibyl
-  15509</pre>
+  15509
+{% endhighlight %}
 </li>
-<li><strong><a name="fetch_the_authentication_token" class="item">Fetch the authentication token</a></strong>
+<li><strong>Fetch the authentication token</strong>
 
 <p>From the password database, the AS gets the real authentication token (p1)</p>
-<pre>
+{% highlight console %}
   # grep rafacas shadow | sed 's/rafacas:$1$[^$]\{8\}$\(.*\)/\1/'
   jlWP/arJwMMLbVwpPZn6k7um8+k00lyfJDX+k7WJzQt/wrvb1Lg7XLdWKVNB5+mT
   1hWah1IX+A4rb4UImHyjKV+L4zLFSiNUbR2YKJCKG7+aOWlYO03fhF5ehuvRVXmW
   4ouIzEVahn4Jx5rkqqCejdOKJqDftgOArWc+6lwLmPOqHG6Zbn9FaKq9A8OeGrst
   BleT7MJZ+Oqnbli70tGoQWBeQmMrvnqLejPuqawiwE3ZP5weFWn9vsidp4rY/Qb4
   ij3vRMznuC3ErcaRBiVH+l2g8t26Q0vLPO+cyuF6xvvKtmwxmZYSThQfebJYjuKn
-  CArtgl6hrIN9ye26N5o5KA==:::::::</pre>
+  CArtgl6hrIN9ye26N5o5KA==:::::::
+{% endhighlight %}
 </li>
-<li><strong><a name="get_the_password" class="item">Get the password</a></strong>
+<li><strong>Get the password</strong>
 
 <p>The AS grabs the password entered by the logging user.</p>
-<pre>
-  # echo -n &quot;Password:&quot;; read password
+{% highlight console %}
+  # echo -n "Password:"; read password
   Password:patata
   # echo $password
-  patata</pre>
+  patata
+{% endhighlight %}
 </li>
-<li><strong><a name="encrypt_with_crypt" class="item">Encrypt with crypt</a></strong>
+<li><strong>Encrypt with crypt</strong>
 
 <p>The AS encrypts, using the crypt function, the password entered by the logging 
 user. We are going to use the crypt program provided by the example. We need the salt used in the first crypt:</p>
-<pre>
+{% highlight console %}
   # export salt=$(echo $p1 | sed 's/^\(\$1\$[^\$]*\$\).*/\1/')
   # echo $salt
-  $1$56X0AGPE$</pre>
-<pre>
-  # export pass_crypted=/crypt $password $salt  # echo $pass_crypted
-  $1$56X0AGPE$AvbQvdvZFPkkJetNItkr91</pre>
-</li>
-<li><strong><a name="rsa_encrypt" class="item">RSA-encrypt</a></strong>
+  $1$56X0AGPE$
 
-<p>The AS encrypts &quot;$nonce_sibyl:$pass_crypted&quot; using the Sibyl's public key to get p2.
+  # export pass_crypted=/crypt $password $salt  # echo $pass_crypted
+  $1$56X0AGPE$AvbQvdvZFPkkJetNItkr91
+{% endhighlight %}
+</li>
+<li><strong>RSA-encrypt</strong>
+
+<p>The AS encrypts <code>$nonce_sibyl:$pass_crypted</code> using the Sibyl's public key to get p2.
 The result will be base64 encoded.</p>
-<p>Compute p2=base64_encode(RSA_encrypt(&quot;nonce_sibyl:crypt(password,salt)))</p>
-<pre>
+<p>Compute <code>p2=base64_encode(RSA_encrypt(nonce_sibyl:crypt(password,salt)))</code></p>
+{% highlight console %}
   # echo $nonce_sibyl:$pass_crypted | \
     openssl rsautl -encrypt -inkey decrypt.pub -pubin | \
     openssl enc -base64
@@ -291,23 +300,24 @@ The result will be base64 encoded.</p>
   xScp8lXghCnD8z5YHgnu9p9hn7jnAMeO5ty/Yk4j19kGPHy0+arnv0Pgw9mgfhcV
   RntBj5LJk9n5lxVxg8lP/RZXripFrxeGDetVPAfZMsA9glSh5tnTqQO5/8PiCD3b
   oLD1gET9tpOGI/ECXT7nEG/FcK7p8J7gbkXlnY6Unz9jD96FYuz8yl4tFrOUvW87
-  WtQxFIHqspvGwAFlnJW4hA==</pre>
+  WtQxFIHqspvGwAFlnJW4hA==
+{% endhighlight %}
 </li>
-<li><strong><a name="query_the_sibyl" class="item">Query the Sibyl</a></strong>
+<li><strong>Query the Sibyl</strong>
 
-<p>The AS sends $nonce_as;$p1;$p2 to the Sibyl.
+<p>The AS sends <code>$nonce_as;$p1;$p2</code> to the Sibyl.
 Note that this nonce is different from the one received from the Sibyl.</p>
 <p>Generate the nonce:</p>
-<pre>
+{% highlight console %}
   # export nonce_as=`cho $RANDOM  # echo $nonce_as
-  28145</pre>
-<pre>
-  The AS sends $nonce_as;$p1;p2</pre>
+  28145
+{% endhighlight %}
+  The AS sends <code>$nonce_as;$p1;p2</code>
 </li>
-<li><strong><a name="sibyl_decrypt_p1" class="item">Sibyl: decrypt p1</a></strong>
+<li><strong>Sibyl: decrypt p1</strong>
 
-<p>The Sibyl decrypts p1 (=u1)</p>
-<pre>
+<p>The Sibyl decrypts <code>p1 (=u1)</code></p>
+{% highlight console %}
   # echo 'jlWP/arJwMMLbVwpPZn6k7um8+k00lyfJDX+k7WJzQt/wrvb1Lg7XLdWKVNB5+mT
     1hWah1IX+A4rb4UImHyjKV+L4zLFSiNUbR2YKJCKG7+aOWlYO03fhF5ehuvRVXmW
     4ouIzEVahn4Jx5rkqqCejdOKJqDftgOArWc+6lwLmPOqHG6Zbn9FaKq9A8OeGrst
@@ -315,48 +325,52 @@ Note that this nonce is different from the one received from the Sibyl.</p>
     ij3vRMznuC3ErcaRBiVH+l2g8t26Q0vLPO+cyuF6xvvKtmwxmZYSThQfebJYjuKn
     CArtgl6hrIN9ye26N5o5KA==' | openssl enc -base64 -d | \   
     openssl rsautl -decrypt -inkey decrypt
-  $1$56X0AGPE$AvbQvdvZFPkkJetNItkr91</pre>
+  $1$56X0AGPE$AvbQvdvZFPkkJetNItkr91
+{% endhighlight %}
 </li>
-<li><strong><a name="sibyl_decrypt_p2" class="item">Sibyl: decrypt p2</a></strong>
+<li><strong>Sibyl: decrypt <code>p2</code></strong>
 
-<p>The Sibyl decrypts p2 (=u2)</p>
-<pre>
-  # echo &quot;SMzBKPKnaJKtqI7IHFTT3jWJ3OBSew4bNpa0ArzpO/xWrAujUtmKydvRUET8WvOt
+<p>The Sibyl decrypts <code>p2 (=u2)</code></p>
+{% highlight console %}
+  # echo "SMzBKPKnaJKtqI7IHFTT3jWJ3OBSew4bNpa0ArzpO/xWrAujUtmKydvRUET8WvOt
     TmSlIupcw6Ivc2Bu54feV63ou8ZOZEYOurMF1BVLJ24lF24xmmHBBOHp94zT0ySy
     xScp8lXghCnD8z5YHgnu9p9hn7jnAMeO5ty/Yk4j19kGPHy0+arnv0Pgw9mgfhcV
     RntBj5LJk9n5lxVxg8lP/RZXripFrxeGDetVPAfZMsA9glSh5tnTqQO5/8PiCD3b
     oLD1gET9tpOGI/ECXT7nEG/FcK7p8J7gbkXlnY6Unz9jD96FYuz8yl4tFrOUvW87
-    WtQxFIHqspvGwAFlnJW4hA==&quot; | \
+    WtQxFIHqspvGwAFlnJW4hA==" | \
     openssl enc -base64 -d | openssl rsautl -decrypt -inkey decrypt
-  15509:$1$56X0AGPE$AvbQvdvZFPkkJetNItkr91</pre>
+  15509:$1$56X0AGPE$AvbQvdvZFPkkJetNItkr91
+{% endhighlight %}
 </li>
-<li><strong><a name="sibyl_check_nonce" class="item">Sibyl: check nonce</a></strong>
+<li><strong>Sibyl: check nonce</strong>
 
-<p>The Sibyl checks that u2 matches the pattern /^n:(.*)$/ and sets v1=$1.
+<p>The Sibyl checks that <code>u2</code> matches the pattern <code>/^n:(.*)$/</code> and sets <code>v1=$1</code>.
 Recall that n is the Sibyl's nonce.</p>
-<pre>
-  # echo &quot;15509:\$1\$56X0AGPE\$AvbQvdvZFPkkJetNItkr91&quot; | sed 's/^[0-9]*:\(.*\)$/v1=\1/'
-  v1=$1$56X0AGPE$AvbQvdvZFPkkJetNItkr91</pre>
+{% highlight console %}
+  # echo "15509:\$1\$56X0AGPE\$AvbQvdvZFPkkJetNItkr91" | sed 's/^[0-9]*:\(.*\)$/v1=\1/'
+  v1=$1$56X0AGPE$AvbQvdvZFPkkJetNItkr91
+{% endhighlight %}
 </li>
-<li><strong><a name="sibyl_check_passwords_match_send_answer" class="item">Sibyl: check passwords match. Send answer</a></strong>
+<li><strong>Sibyl: check passwords match. Send answer</strong>
 
-<p>If u1=v1 then the Sibyl returns the message $nonce_as:1 signed with the
-signing key. Otherwise, it returns the message m:0 signed with the same key.</p>
-<p>In this example u1=v1 so we will send $nonce_as:1 (signed with the sign private key)</p>
-<pre>
+<p>If <code>u1=v1</code> then the Sibyl returns the message <code>$nonce_as:1</code> signed with the
+signing key. Otherwise, it returns the <code>message m:0</code> signed with the same key.</p>
+<p>In this example <code>u1=v1</code> so we will send <code>$nonce_as:1</code> (signed with the sign private key)</p>
+{% highlight console %}
   # echo '28145:1' | openssl rsautl -sign -inkey sign | openssl enc -base64
   UtVb/m1VAH0qHr/nmqiE9Y8BieN3XzoMshH7cp5qvH976SIAwVGUelUfllQ7DS4n
   ZL4thteGn+sG608UWX8rS5/DgEFg2YjPHCls3z8MVVm8Gtite9/vn55IA2HfeNoq
   8wPC0vcP48nCmE0U3QerCLqNtUyluOhoqXUJUYLPZfHXmzNK+S7tPlyM3abCwtlH
   zOcR11nFRi9YihbY36H64dSMQi9CY+e1er/i4469gT7PmH7yosH38bEcMLDEYR5L
   rYH+5oTrx3HLjk9X6zxjaClDC1NTVmLrCV40Nvy2/1qqJ9UZMBqRwrch0AABKmoV
-  JbcPmbYONk3kx/6FA+auiA==</pre>
+  JbcPmbYONk3kx/6FA+auiA==
+{% endhighlight %}
 </li>
-<li><strong><a name="as_receive_answer_and_verify_signature" class="item">AS: receive answer and verify signature</a></strong>
+<li><strong>AS: receive answer and verify signature</strong>
 
 <p>The AS receives the signed message from the Sibil and checks if it is properly
 signed</p>
-<pre>
+{% highlight console %}
   # echo 'UtVb/m1VAH0qHr/nmqiE9Y8BieN3XzoMshH7cp5qvH976SIAwVGUelUfllQ7DS4n
     ZL4thteGn+sG608UWX8rS5/DgEFg2YjPHCls3z8MVVm8Gtite9/vn55IA2HfeNoq
     8wPC0vcP48nCmE0U3QerCLqNtUyluOhoqXUJUYLPZfHXmzNK+S7tPlyM3abCwtlH
@@ -364,12 +378,13 @@ signed</p>
     rYH+5oTrx3HLjk9X6zxjaClDC1NTVmLrCV40Nvy2/1qqJ9UZMBqRwrch0AABKmoV
     JbcPmbYONk3kx/6FA+auiA==' | openssl enc -base64 -d | openssl rsautl -verify \
     -inkey sign.pub -pubin
-  28145:1</pre>
+  28145:1
+{% endhighlight %}
 </li>
-<li><strong><a name="check_if_answer_was_ok_or_not_ok" class="item">Check if answer was 'OK' or 'NOT OK'</a></strong>
+<li><strong>Check if answer was <code>'OK'</code> or <code>'NOT OK'</code></strong>
 
-<p>As $nonce_as is equal to the number received in the first part of the message
-(28145) and the second part of it is 1, the AS grants authentication. In any 
+<p>As <code>$nonce_as</code> is equal to the number received in the first part of the message
+(<code>28145</code>) and the second part of it is 1, the AS grants authentication. In any 
 other case, it is denied.</p>
 </li>
 </ol>

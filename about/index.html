@@ -3,7 +3,17 @@ layout: default
 ---
 
 <h3>What is The Sibyl?</h3>
+<p>We present a different approach for storing shadow files: using a
+separate server for checking the correctness of the password
+introduced by the user, taking advantage of symmetric key encryption.</p>
 
+<p>In summary: instead of keeping the hash (as <code>crypt(3)</code> does, or <code>SHA1</code>) of
+the password in the shadow file, store an <code>OAEP RSA-cyphertext</code> of the
+password (using a public encryption key) and, each time the user tries
+to log in, ask someone (the owner of the private key) if the
+OAEP-encryption of the password issued by the logging user matches the
+stored cyphertext. That is: use an oracle to ask if the user has
+entered the correct password or not. This oracle is <strong>the Sibyl</strong>.</p>
 
 <h3>Why?</h3>
 <p>Because dictionary attacks and rainbow tables cannot be just defeated using complicated hash functions and salts: users always find the weakest possible password for any scheme.</p>
@@ -14,11 +24,16 @@ layout: default
 
 <p>Our approach uses the random nature of OAEP, which essentially adds more than 80 bits of randomness to the cyphertext, making both dictionary and rainbow tables attacks infeasible (in order to obtain the same cyphertext, the attacker needs to try the same password as the user <strong>and</strong> use the same random bits when encrypting).</p>
 
-<h3>Want more?</h3>
-<p>For an overview of The Sibyl and why you would use it, you should watch the presentation we gave at <strong>NoConName 2011</strong> (Sorry, it is in Spanish only):</p>
+<h3>What's next?</h3>
+<p>The source code of this project is on <a href="https://github.com/thesibyl" target="_blank">github</a></p>
+
+<p>For an overview of the Sibyl you should watch the presentation we gave at <strong>NoConName 2011</strong> (Sorry, it is in Spanish only):</p>
 
 <p>
 <object id="flowplayer" width="720" height="404" data="http://www.globbtv.com/flv/flowplayer.commercial-3.2.3.swf" type="application/x-shockwave-flash"><param value="true" name="allowfullscreen"/><param value="always" name="allowscriptaccess"/><param value="high" name="quality"/><param value="true" name="cachebusting"/><param value="#000000" name="bgcolor"/><param name="movie" value="http://www.globbtv.com/flv/flowplayer.commercial-3.2.3.swf" /><param name="flashvars" value='config={"key":"#$cc8f7551c7e6a3f7d92", "canvas":{"backgroundColor":"#000000","backgroundGradient": "none","backgroundImage":"url(http://www.globbtv.com/img/watermark.jpg)"}, "clip":{"autoPlay":false,"url":"http://cdn.globbtv.com/003BDA/VODMS01/NoConName_La_Sibila.mp4"}}' /></object>
 </p>
 
-<p>Here you can see the slides:</p>
+<p>These are the slides used on the presentation:</p>
+<center>
+<iframe src="http://www.slideshare.net/slideshow/embed_code/21453826" width="720" height="575" frameborder="0" marginwidth="0" marginheight="0" scrolling="no" style="border:1px solid #CCC;border-width:1px 1px 0;margin-bottom:5px" allowfullscreen webkitallowfullscreen mozallowfullscreen> </iframe>
+</center>
